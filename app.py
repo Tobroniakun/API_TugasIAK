@@ -38,6 +38,9 @@ class BookList(Resource):
 
     def post(self):
         new_book = request.get_json()
+        # Validasi data baru
+        if not new_book or not all(k in new_book for k in ("title", "author", "year", "genre")):
+            return jsonify({"error": "Invalid data"}), 400
         new_book["id"] = books[-1]["id"] + 1 if books else 1
         books.append(new_book)
         return jsonify(new_book), 201
@@ -55,13 +58,16 @@ class Book(Resource):
         if not book:
             return jsonify({"error": "Book not found"}), 404
         update_data = request.get_json()
+        # Validasi data update
+        if not update_data:
+            return jsonify({"error": "Invalid data"}), 400
         book.update(update_data)
         return jsonify(book)
 
     def delete(self, book_id):
         global books
         books = [book for book in books if book["id"] != book_id]
-        return jsonify({"message": "Book deleted"}), 204
+        return '', 204  # Mengembalikan respons kosong dengan status 204
 
 # Menambahkan endpoint ke API
 api.add_resource(BookList, "/books")
